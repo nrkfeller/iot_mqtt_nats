@@ -8,7 +8,6 @@ import (
 	"log"
 	"math/rand"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -26,7 +25,11 @@ func usage() {
 func messageReceived(client *MQTT.Client, msg MQTT.Message) {
 	topics := strings.Split(msg.Topic(), "/")
 	msgFrom := topics[len(topics)-1]
-	fmt.Print(msgFrom+": "+string(msg.Payload()), " to ")
+	// fmt.Print(msgFrom+": "+string(msg.Payload()), " to ")
+
+	//subj, msg := args[0], []byte(args[1])
+
+	//fmt.Print(msgFrom + ": " + string(msg.Payload())) //, " to ", nc.ConnectedUrl())
 
 	nc, err := nats.Connect(*urls)
 	if err != nil {
@@ -34,21 +37,18 @@ func messageReceived(client *MQTT.Client, msg MQTT.Message) {
 	}
 	defer nc.Close()
 
-	//subj, msg := args[0], []byte(args[1])
-
-	fmt.Print(msgFrom+": "+string(msg.Payload()), " to ", nc.ConnectedUrl())
-
 	nc.Publish(msgFrom, msg.Payload())
 	nc.Flush()
 }
 
 func main() {
+
 	stdin := bufio.NewReader(os.Stdin)
 	rand.Seed(time.Now().Unix())
 
 	broker := flag.String("broker", "tcp://iot.eclipse.org:1883", "The MQTT broker to connect to")
 	endpoint := flag.String("endpoint", "endpoint1", "The chat room to enter. default 'gochat'")
-	name := flag.String("name", "user"+strconv.Itoa(rand.Intn(1000)), "Username to be displayed")
+	name := flag.String("name", "MQTT to NATS", "Username to be displayed")
 	flag.Parse()
 
 	subTopic := strings.Join([]string{"/broker/", *endpoint, "/+"}, "")
